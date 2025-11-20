@@ -18,24 +18,18 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Your Assistant ID
-ASSISTANT_ID = "asst_bBLvW1TIJ2lBYTjCYlfftrhu"
+ASSISTANT_ID = "asst_TnjbiLVFgUlcy9ZTmO1ruCCI"
 
 # Streamlit Page Config
-st.set_page_config(page_title="HR Shortlister", page_icon="🤖")
+st.set_page_config(page_title="INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION", page_icon="♾️")
 
 # -------------------------------------------------
 # App Header
 # -------------------------------------------------
 
-st.title("HR Shortlister 🤖")
-st.caption("Chat with your AI assistant to evaluate and shortlist candidates efficiently.")
+st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION♾️")
+st.caption("Handle INNOVA data and email categories in one place, without the clutter")
 
-st.markdown("""
-This assistant connects to **OpenAI’s HR Shortlister** to help you:
-- Review and compare candidate profiles.
-- Generate shortlist recommendations.
-- Draft evaluation feedback and hiring insights.
-""")
 
 # -------------------------------------------------
 # Chat Interface Setup
@@ -103,26 +97,3 @@ if prompt := st.chat_input("Ask HR Shortlister anything..."):
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
-# -------------------------------------------------
-# Sidebar
-# -------------------------------------------------
-
-st.sidebar.header("About HR Shortlister")
-st.sidebar.write("""
-**HR Shortlister** uses OpenAI’s API to support HR teams by:
-- Analysing resumes and candidate experience.
-- Providing shortlist recommendations.
-- Suggesting structured evaluation feedback.
-""")
-
-st.sidebar.divider()
-
-st.sidebar.header("Tips for Better Results")
-st.sidebar.write("""
-- Be clear about the role and context.
-- Provide short candidate summaries if possible.
-- Ask measurable, outcome-based questions.
-""")
-
-st.sidebar.divider()
-st.sidebar.caption("Built with  ❤️ using Streamlit and OpenAI.")
