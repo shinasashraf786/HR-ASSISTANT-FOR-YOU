@@ -66,7 +66,7 @@ if prompt := st.chat_input("Ask anything"):
 
     # Run the assistant
     with st.chat_message("assistant"):
-        with st.spinner("HR Shortlister is thinking..."):
+        with st.spinner("Innova AI is thinking…"):
             try:
                 run = client.beta.threads.runs.create(
                     thread_id=st.session_state.thread_id,
