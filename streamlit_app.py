@@ -51,7 +51,7 @@ for msg in st.session_state.messages:
 # User Input
 # -------------------------------------------------
 
-if prompt := st.chat_input("Ask HR Shortlister anything..."):
+if prompt := st.chat_input("Ask anything"):
     # Display user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
