@@ -125,4 +125,4 @@ st.sidebar.write("""
 """)
 
 st.sidebar.divider()
-st.sidebar.caption("Built with ❤️ using Streamlit and OpenAI.")
+st.sidebar.caption("Built with  ❤️ using Streamlit and OpenAI.")
