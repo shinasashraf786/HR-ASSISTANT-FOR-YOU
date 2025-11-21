@@ -12,40 +12,21 @@ import streamlit as st
 # -------------------------------------------------
 
 def authenticate():
+    st.session_state["authenticated"] = False
 
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-
-    # Logo
-    st.markdown(
-        f"""
-        <div class="logo">
-            <img src="file:///mnt/data/Metropolis.png" width="90">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Title
-    st.markdown('<div class="login-title">Secure Login</div>', unsafe_allow_html=True)
-
-    # Inputs
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     correct_username = os.getenv("APP_USERNAME")
     correct_password = os.getenv("APP_PASSWORD")
 
-    login_btn = st.button("Login")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    if login_btn:
+    if st.button("Login"):
         if username == correct_username and password == correct_password:
             st.session_state["authenticated"] = True
-            st.rerun()
+            st.rerun()   # FIX
         else:
-            st.error("Invalid username or password")
-            
+            st.error("Invalid credentials")
+
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
     authenticate()
     st.stop()
