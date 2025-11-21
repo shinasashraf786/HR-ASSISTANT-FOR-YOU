@@ -8,6 +8,33 @@ from openai import OpenAI
 import streamlit as st
 
 # -------------------------------------------------
+# Simple Authentication Layer
+# -------------------------------------------------
+
+def authenticate():
+    st.session_state["authenticated"] = False
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    correct_username = os.getenv("APP_USERNAME")
+    correct_password = os.getenv("APP_PASSWORD")
+
+    if st.button("Login"):
+        if username == correct_username and password == correct_password:
+            st.session_state["authenticated"] = True
+            st.experimental_rerun()
+        else:
+            st.error("Invalid credentials")
+
+
+if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
+    st.title("Login Required")
+    authenticate()
+    st.stop()
+
+
+# -------------------------------------------------
 # Environment Setup
 # -------------------------------------------------
 
