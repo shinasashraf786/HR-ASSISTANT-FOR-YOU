@@ -13,44 +13,43 @@ import streamlit as st
 def inject_css():
     st.markdown("""
         <style>
-
-            body {
-                background-color: #f0f2f5;
+            /* Centre the login box */
+            .login-container {
+                max-width: 380px;
+                margin: 8% auto;
+                padding: 40px;
+                border-radius: 12px;
+                background: #ffffff;
+                box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
             }
 
-            .login-box {
-                max-width: 360px;
-                margin: 10% auto;
-                padding: 20px;
-                border-radius: 10px;
-            }
-
-            .center {
+            .login-title {
                 text-align: center;
+                font-size: 26px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: #1e1e1e;
             }
 
-            /* Blue Meta Button */
+            .stTextInput > div > div > input {
+                padding: 10px;
+                border-radius: 8px;
+            }
+
             .stButton > button {
-                background-color: #1877F2;
-                color: white;
-                font-weight: 600;
                 width: 100%;
+                background: #0033cc;
+                color: white;
                 padding: 10px 0;
-                border-radius: 6px;
-                border: none;
+                border-radius: 8px;
+                font-weight: 500;
                 font-size: 16px;
+                border: none;
             }
 
             .stButton > button:hover {
-                background-color: #0f5fcc;
+                background: #002699;
             }
-
-            /* Inputs */
-            .stTextInput > div > div > input {
-                padding: 10px;
-                border-radius: 6px;
-            }
-
         </style>
     """, unsafe_allow_html=True)
 
