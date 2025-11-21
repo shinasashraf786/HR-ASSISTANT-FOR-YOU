@@ -10,49 +10,6 @@ import streamlit as st
 # -------------------------------------------------
 # Simple Authentication Layer
 # -------------------------------------------------
-def inject_css():
-    st.markdown("""
-        <style>
-            /* Centre the login box */
-            .login-container {
-                max-width: 380px;
-                margin: 8% auto;
-                padding: 40px;
-                border-radius: 12px;
-                background: #ffffff;
-                box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-            }
-
-            .login-title {
-                text-align: center;
-                font-size: 26px;
-                font-weight: 600;
-                margin-bottom: 20px;
-                color: #1e1e1e;
-            }
-
-            .stTextInput > div > div > input {
-                padding: 10px;
-                border-radius: 8px;
-            }
-
-            .stButton > button {
-                width: 100%;
-                background: #0033cc;
-                color: white;
-                padding: 10px 0;
-                border-radius: 8px;
-                font-weight: 500;
-                font-size: 16px;
-                border: none;
-            }
-
-            .stButton > button:hover {
-                background: #002699;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
 
 def authenticate():
     inject_css()
