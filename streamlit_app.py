@@ -10,27 +10,96 @@ import streamlit as st
 # -------------------------------------------------
 # Simple Authentication Layer
 # -------------------------------------------------
+def inject_css():
+    st.markdown("""
+        <style>
+            body {
+                background-color: #f5f5f5;
+            }
+
+            .login-container {
+                max-width: 420px;
+                margin: 6% auto;
+                padding: 40px;
+                border-radius: 14px;
+                background: #ffffff;
+                box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.12);
+            }
+
+            .logo {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+
+            .login-title {
+                text-align: center;
+                font-size: 24px;
+                font-weight: 600;
+                color: #111;
+                margin-bottom: 25px;
+            }
+
+            .stTextInput > div > div > input {
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+            }
+
+            .stButton > button {
+                width: 100%;
+                background: #E40020; /* Metropolis Red */
+                color: white;
+                padding: 10px 0;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                border: none;
+            }
+
+            .stButton > button:hover {
+                background: #c0001a; /* darker red on hover */
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
 def authenticate():
-    st.session_state["authenticated"] = False
+    inject_css()
 
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
+
+    # Logo
+    st.markdown(
+        f"""
+        <div class="logo">
+            <img src="file:///mnt/data/Metropolis.png" width="90">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Title
+    st.markdown('<div class="login-title">Secure Login</div>', unsafe_allow_html=True)
+
+    # Inputs
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     correct_username = os.getenv("APP_USERNAME")
     correct_password = os.getenv("APP_PASSWORD")
 
-    if st.button("Login"):
+    login_btn = st.button("Login")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if login_btn:
         if username == correct_username and password == correct_password:
             st.session_state["authenticated"] = True
-            st.rerun()   # FIX
+            st.rerun()
         else:
-            st.error("Invalid credentials")
-
-
-
+            st.error("Invalid username or password")
+            
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
-    st.title("Login Required")
     authenticate()
     st.stop()
 
