@@ -12,7 +12,6 @@ import streamlit as st
 # -------------------------------------------------
 
 def authenticate():
-    inject_css()
 
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
 
