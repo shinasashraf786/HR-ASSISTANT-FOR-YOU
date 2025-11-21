@@ -13,55 +13,47 @@ import streamlit as st
 def inject_css():
     st.markdown("""
         <style>
+
             body {
-                background-color: #f5f5f5;
+                background-color: #f0f2f5;
             }
 
-            .login-container {
-                max-width: 420px;
-                margin: 6% auto;
-                padding: 40px;
-                border-radius: 14px;
-                background: #ffffff;
-                box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.12);
+            .login-box {
+                max-width: 360px;
+                margin: 10% auto;
+                padding: 20px;
+                border-radius: 10px;
             }
 
-            .logo {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
-            }
-
-            .login-title {
+            .center {
                 text-align: center;
-                font-size: 24px;
-                font-weight: 600;
-                color: #111;
-                margin-bottom: 25px;
             }
 
-            .stTextInput > div > div > input {
-                padding: 10px;
-                border-radius: 8px;
-                border: 1px solid #ccc;
-            }
-
+            /* Blue Meta Button */
             .stButton > button {
-                width: 100%;
-                background: #E40020; /* Metropolis Red */
+                background-color: #1877F2;
                 color: white;
-                padding: 10px 0;
-                border-radius: 8px;
                 font-weight: 600;
-                font-size: 16px;
+                width: 100%;
+                padding: 10px 0;
+                border-radius: 6px;
                 border: none;
+                font-size: 16px;
             }
 
             .stButton > button:hover {
-                background: #c0001a; /* darker red on hover */
+                background-color: #0f5fcc;
             }
+
+            /* Inputs */
+            .stTextInput > div > div > input {
+                padding: 10px;
+                border-radius: 6px;
+            }
+
         </style>
     """, unsafe_allow_html=True)
+
 
 def authenticate():
     inject_css()
