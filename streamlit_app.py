@@ -28,6 +28,7 @@ def authenticate():
             st.error("Invalid credentials")
 
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
+    st.title("Login Required")
     authenticate()
     st.stop()
 
