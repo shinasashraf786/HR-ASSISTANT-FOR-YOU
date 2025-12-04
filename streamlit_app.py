@@ -154,8 +154,8 @@ with st.sidebar:
 # Main Chat Area
 # -------------------------------------------------
 if st.session_state["active_convo"] is None:
-    st.title("INNOVA CHAT")
-    st.caption("Start by creating a new chat.")
+    st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION♾️")
+    st.caption("Handle INNOVA data and email categories in one place, without the clutter")
     st.stop()
 
 cid = st.session_state["active_convo"]
