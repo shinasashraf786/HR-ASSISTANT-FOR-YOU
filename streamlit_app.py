@@ -146,7 +146,7 @@ with st.sidebar:
         # Delete folder (only if empty)
         if not any(c["folder"] == selected_folder for c in st.session_state["conversations"].values()):
             if st.button("\U0001F5D1 Delete Folder"):
-                folders.remove(selected_folder)
+                st.session_state["active_convo"] = None
                 save_conversations(st.session_state["conversations"])
                 st.rerun()
 
