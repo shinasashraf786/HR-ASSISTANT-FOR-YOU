@@ -1,11 +1,29 @@
 # Copyright 2025
-# INNOVA Data Integration – Streamlit Chat Application
+# INNOVA Chat App with Persistent Chat History
 
 import os
+import json
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
 import streamlit as st
+
+# -------------------------------------------------
+# Persistent Storage Helpers
+# -------------------------------------------------
+
+STORAGE_FILE = "conversations.json"
+
+def load_conversations():
+    if os.path.exists(STORAGE_FILE):
+        with open(STORAGE_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_conversations(data):
+    with open(STORAGE_FILE, "w") as f:
+        json.dump(data, f)
+
 
 # -------------------------------------------------
 # Authentication Layer
@@ -39,55 +57,46 @@ if "authenticated" not in st.session_state or not st.session_state["authenticate
 # -------------------------------------------------
 
 load_dotenv()
-
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 ASSISTANT_ID = "asst_TnjbiLVFgUlcy9ZTmO1ruCCI"
 
 st.set_page_config(page_title="INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION", 
-                   page_icon="♾️",
-                   layout="wide")
+                   page_icon="♾️", layout="wide")
 
 
 # -------------------------------------------------
-# Initialise conversation states
+# Load/Init conversations
 # -------------------------------------------------
 
 if "conversations" not in st.session_state:
-    st.session_state["conversations"] = {}
+    st.session_state["conversations"] = load_conversations()
 
 if "active_convo" not in st.session_state:
     st.session_state["active_convo"] = None
 
 if "threads" not in st.session_state:
-    st.session_state["threads"] = {}    # each conversation gets a unique OpenAI thread
+    st.session_state["threads"] = {}
 
 
 # -------------------------------------------------
-# Sidebar (ChatGPT-style)
+# Sidebar with ChatGPT-style History
 # -------------------------------------------------
 
 with st.sidebar:
     st.header("Chats")
 
-    # New Chat Button
     if st.button("New Chat"):
         convo_id = str(time.time())
-
-        # New conversation entry
         st.session_state["conversations"][convo_id] = {
             "title": "New Conversation",
             "messages": []
         }
-
-        # Create a new OpenAI thread for this conversation
         new_thread = client.beta.threads.create()
         st.session_state["threads"][convo_id] = new_thread.id
-
-        # Activate it
         st.session_state["active_convo"] = convo_id
+        save_conversations(st.session_state["conversations"])
         st.rerun()
 
-    # List existing conversations
     for convo_id, convo in st.session_state["conversations"].items():
         if st.button(convo["title"], key=convo_id):
             st.session_state["active_convo"] = convo_id
@@ -95,7 +104,7 @@ with st.sidebar:
 
 
 # -------------------------------------------------
-# No chat selected yet
+# No active conversation
 # -------------------------------------------------
 
 if st.session_state["active_convo"] is None:
@@ -105,16 +114,21 @@ if st.session_state["active_convo"] is None:
 
 
 # -------------------------------------------------
-# Load active conversation
+# Load Active Chat + Thread
 # -------------------------------------------------
 
 convo_id = st.session_state["active_convo"]
 conversation = st.session_state["conversations"][convo_id]
+
+if convo_id not in st.session_state["threads"]:
+    thread = client.beta.threads.create()
+    st.session_state["threads"][convo_id] = thread.id
+
 thread_id = st.session_state["threads"][convo_id]
 
 
 # -------------------------------------------------
-# Page Header
+# App Header
 # -------------------------------------------------
 
 st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION ♾️")
@@ -122,7 +136,7 @@ st.caption("Handle INNOVA data and email categories in one place, without the cl
 
 
 # -------------------------------------------------
-# Display chat history
+# Display Chat History
 # -------------------------------------------------
 
 for msg in conversation["messages"]:
@@ -131,40 +145,35 @@ for msg in conversation["messages"]:
 
 
 # -------------------------------------------------
-# Chat Input + OpenAI Assistant Response
+# Chat Input + Assistant Response
 # -------------------------------------------------
 
 if prompt := st.chat_input("Ask anything"):
 
     # Save user message
     conversation["messages"].append({"role": "user", "content": prompt})
+    save_conversations(st.session_state["conversations"])
 
-    # Display user message
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Update conversation title (first prompt)
     if conversation["title"] == "New Conversation":
         conversation["title"] = prompt[:30]
 
-    # Send user prompt to OpenAI thread
-    client.beta.threads.messages.create(
-        thread_id=thread_id,
-        role="user",
-        content=prompt
-    )
+    try:
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=prompt
+        )
 
-    # Process assistant response
-    with st.chat_message("assistant"):
-        with st.spinner("Innova AI is thinking…"):
-            try:
-                # Start a run
+        with st.chat_message("assistant"):
+            with st.spinner("Innova AI is thinking…"):
                 run = client.beta.threads.runs.create(
                     thread_id=thread_id,
                     assistant_id=ASSISTANT_ID
                 )
 
-                # Poll until done
                 while True:
                     status = client.beta.threads.runs.retrieve(
                         thread_id=thread_id,
@@ -174,14 +183,12 @@ if prompt := st.chat_input("Ask anything"):
                         break
                     time.sleep(1)
 
-                # Fetch latest reply
                 messages = client.beta.threads.messages.list(thread_id=thread_id)
                 reply = messages.data[0].content[0].text.value
 
                 st.markdown(reply)
-
-                # Save assistant reply
                 conversation["messages"].append({"role": "assistant", "content": reply})
+                save_conversations(st.session_state["conversations"])
 
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
