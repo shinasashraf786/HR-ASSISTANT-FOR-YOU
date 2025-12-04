@@ -1,5 +1,5 @@
 # Copyright 2025
-# HR Shortlister Streamlit Chat Application
+# INNOVA Data Integration – Streamlit Chat Application
 
 import os
 import time
@@ -8,7 +8,7 @@ from openai import OpenAI
 import streamlit as st
 
 # -------------------------------------------------
-# Simple Authentication Layer
+# Authentication Layer
 # -------------------------------------------------
 
 def authenticate():
@@ -23,9 +23,10 @@ def authenticate():
     if st.button("Login"):
         if username == correct_username and password == correct_password:
             st.session_state["authenticated"] = True
-            st.rerun()   # FIX
+            st.rerun()
         else:
             st.error("Invalid credentials")
+
 
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
     st.title("Login Required")
@@ -37,89 +38,150 @@ if "authenticated" not in st.session_state or not st.session_state["authenticate
 # Environment Setup
 # -------------------------------------------------
 
-# Load environment variables from .env
 load_dotenv()
 
-# Configure OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# Your Assistant ID
 ASSISTANT_ID = "asst_TnjbiLVFgUlcy9ZTmO1ruCCI"
 
-# Streamlit Page Config
-st.set_page_config(page_title="INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION", page_icon="♾️")
+st.set_page_config(page_title="INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION", 
+                   page_icon="♾️",
+                   layout="wide")
+
 
 # -------------------------------------------------
-# App Header
+# Initialise conversation states
 # -------------------------------------------------
 
-st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION♾️")
+if "conversations" not in st.session_state:
+    st.session_state["conversations"] = {}
+
+if "active_convo" not in st.session_state:
+    st.session_state["active_convo"] = None
+
+if "threads" not in st.session_state:
+    st.session_state["threads"] = {}    # each conversation gets a unique OpenAI thread
+
+
+# -------------------------------------------------
+# Sidebar (ChatGPT-style)
+# -------------------------------------------------
+
+with st.sidebar:
+    st.header("Chats")
+
+    # New Chat Button
+    if st.button("New Chat"):
+        convo_id = str(time.time())
+
+        # New conversation entry
+        st.session_state["conversations"][convo_id] = {
+            "title": "New Conversation",
+            "messages": []
+        }
+
+        # Create a new OpenAI thread for this conversation
+        new_thread = client.beta.threads.create()
+        st.session_state["threads"][convo_id] = new_thread.id
+
+        # Activate it
+        st.session_state["active_convo"] = convo_id
+        st.rerun()
+
+    # List existing conversations
+    for convo_id, convo in st.session_state["conversations"].items():
+        if st.button(convo["title"], key=convo_id):
+            st.session_state["active_convo"] = convo_id
+            st.rerun()
+
+
+# -------------------------------------------------
+# No chat selected yet
+# -------------------------------------------------
+
+if st.session_state["active_convo"] is None:
+    st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION ♾️")
+    st.caption("Start a new chat using the button on the left.")
+    st.stop()
+
+
+# -------------------------------------------------
+# Load active conversation
+# -------------------------------------------------
+
+convo_id = st.session_state["active_convo"]
+conversation = st.session_state["conversations"][convo_id]
+thread_id = st.session_state["threads"][convo_id]
+
+
+# -------------------------------------------------
+# Page Header
+# -------------------------------------------------
+
+st.title("INNOVA DATA INTEGRATION AND EMAIL CATEGORISATION ♾️")
 st.caption("Handle INNOVA data and email categories in one place, without the clutter")
 
 
 # -------------------------------------------------
-# Chat Interface Setup
+# Display chat history
 # -------------------------------------------------
 
-if "thread_id" not in st.session_state:
-    thread = client.beta.threads.create()
-    st.session_state.thread_id = thread.id
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Display prior messages
-for msg in st.session_state.messages:
+for msg in conversation["messages"]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+
 # -------------------------------------------------
-# User Input
+# Chat Input + OpenAI Assistant Response
 # -------------------------------------------------
 
 if prompt := st.chat_input("Ask anything"):
+
+    # Save user message
+    conversation["messages"].append({"role": "user", "content": prompt})
+
     # Display user message
-    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Add user message to thread
+    # Update conversation title (first prompt)
+    if conversation["title"] == "New Conversation":
+        conversation["title"] = prompt[:30]
+
+    # Send user prompt to OpenAI thread
     client.beta.threads.messages.create(
-        thread_id=st.session_state.thread_id,
+        thread_id=thread_id,
         role="user",
         content=prompt
     )
 
-    # Run the assistant
+    # Process assistant response
     with st.chat_message("assistant"):
         with st.spinner("Innova AI is thinking…"):
             try:
+                # Start a run
                 run = client.beta.threads.runs.create(
-                    thread_id=st.session_state.thread_id,
+                    thread_id=thread_id,
                     assistant_id=ASSISTANT_ID
                 )
 
-                # Poll until run completes
+                # Poll until done
                 while True:
                     status = client.beta.threads.runs.retrieve(
-                        thread_id=st.session_state.thread_id,
+                        thread_id=thread_id,
                         run_id=run.id
                     )
                     if status.status == "completed":
                         break
                     time.sleep(1)
 
-                # Get assistant reply
-                messages = client.beta.threads.messages.list(
-                    thread_id=st.session_state.thread_id
-                )
+                # Fetch latest reply
+                messages = client.beta.threads.messages.list(thread_id=thread_id)
                 reply = messages.data[0].content[0].text.value
 
                 st.markdown(reply)
 
-                # Store assistant response
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+                # Save assistant reply
+                conversation["messages"].append({"role": "assistant", "content": reply})
 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-
