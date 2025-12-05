@@ -140,15 +140,23 @@ with st.sidebar:
                 pass
 
     # Export folder as one PDF
-  # Delete folder (always visible, disabled if not empty)
-folder_convos = [cid for cid, c in st.session_state["conversations"].items() if c["folder"] == selected_folder]
+    # --- DELETE FOLDER (delete all chats inside) ---
+    if st.button("🗑️ Delete Folder"):
+        # Delete all conversations belonging to this folder
+        ids_to_delete = [cid for cid, c in st.session_state["conversations"].items() 
+                         if c.get("folder") == selected_folder]
 
-if folder_convos:
-    st.warning("Folder must be empty to delete")
-else:
-    if st.button("\U0001F5D1 Delete Folder"):
+        for cid in ids_to_delete:
+            st.session_state["conversations"].pop(cid, None)
+            st.session_state["threads"].pop(cid, None)
+
+        # Reset active convo
         st.session_state["active_convo"] = None
+
+        # Save updated conversations
         save_conversations(st.session_state["conversations"])
+
+        # Refresh
         st.rerun()
 
 
