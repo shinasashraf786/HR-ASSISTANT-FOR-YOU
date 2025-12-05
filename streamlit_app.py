@@ -140,15 +140,16 @@ with st.sidebar:
                 pass
 
     # Export folder as one PDF
-    if selected_folder != "+ New Folder":
-        if st.download_button("\U0001F4BE Export Folder PDF", data=open(export_folder_to_pdf(selected_folder, st.session_state["conversations"]), "rb"), file_name=f"{selected_folder}.pdf", mime="application/pdf"):
-            pass
-        # Delete folder (only if empty)
-        if not any(c["folder"] == selected_folder for c in st.session_state["conversations"].values()):
-            if st.button("\U0001F5D1 Delete Folder"):
-                st.session_state["active_convo"] = None
-                save_conversations(st.session_state["conversations"])
-                st.rerun()
+  # Delete folder (always visible, disabled if not empty)
+folder_is_empty = not any(c["folder"] == selected_folder for c in st.session_state["conversations"].values())
+
+if folder_is_empty:
+    if st.button("🗑 Delete Folder"):
+        st.session_state["active_convo"] = None
+        save_conversations(st.session_state["conversations"])
+        st.rerun()
+else:
+    st.button("🗑 Delete Folder", disabled=True, help="Folder must be empty to delete")
 
 # -------------------------------------------------
 # Main Chat Area
